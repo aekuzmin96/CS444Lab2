@@ -22,9 +22,11 @@ public class Main {
     private static String arg2 = " -id 35";
     private static String IV = "4b4d3239764863686245437379465942";
     private static String ciphertext = "adbeb300136c6305bf21eb69dc71e7c0";
-    private static String[] rValue = new String[16];
-    private static String[] hex = new String[256];
     private static String[] IVarray;
+    private static String[] rValue = new String[16];
+    private static String[] xoredRvalue = new String[16];
+    private static String[] hex = new String[256];
+    private static String[] changedIVarray;
     private static int rIndex = 15;
 
     private static String[] disassembleString(String s)
@@ -80,6 +82,7 @@ public class Main {
 
             while ((s = stdError.readLine()) != null)
             {
+                System.out.println(s);
                 getRValue(s);
             }
         }
@@ -94,8 +97,9 @@ public class Main {
         {
             if(s.charAt(i) == 'M')
             {
-                rValue[rIndex] = IVarray[rIndex];
-                System.out.println(rValue[rIndex]);
+                System.out.println(assembleString(changedIVarray));
+                rValue[rIndex] = changedIVarray[rIndex];
+                xoredRvalue[rIndex] = xor(rValue[15], "1");
                 rIndex--;
             }
         }
@@ -103,17 +107,19 @@ public class Main {
 
     private static void runDecoder()
     {
-        IVarray = disassembleString(IV);
+        changedIVarray = disassembleString(IV);
 
         for(int i = 0; i < 256; i++)
         {
-            IVarray[15] = hex[i];
-            runPython(assembleString(IVarray));
+            changedIVarray[15] = hex[i];
+            runPython(assembleString(changedIVarray));
         }
     }
 
     public static void main(String[] args) {
         initialize();
         runDecoder();
+        //System.out.println(xoredRvalue[15]);
+        //System.out.println(xor(xoredRvalue[15], ));
     }
 }
