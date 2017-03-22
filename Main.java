@@ -18,18 +18,26 @@ public class Main {
      */
 
     private static String path = "python /nfs/student/a/akuzmin/IdeaProjects/CS444Lab2/src/client.py ";
-    private static String arg1 = "-ip shasta.cs.unm.edu -p 10035 -b '";
-    private static String arg2 = "' -id 35";
+    private static String arg1 = "-ip shasta.cs.unm.edu -p 10035 -b ";
+    private static String arg2 = " -id 35";
     private static String IV = "4b4d3239764863686245437379465942";
     private static String ciphertext = "adbeb300136c6305bf21eb69dc71e7c0";
     private static String[] rValue = new String[16];
     private static String[] hex = new String[256];
-    private static int[] offset;
+    private static String[] IVarray;
 
-    private static void initializeProgram()
+    private static String[] disassembleString(String s)
     {
-        buildHexValues();
-        offset = new int[] {16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+        return s.split("(?<=\\G.{2})");
+    }
+
+    private static String assembleString(String[] s)
+    {
+        StringBuilder strBuilder = new StringBuilder();
+        for (int i = 0; i < s.length; i++) {
+            strBuilder.append(s[i]);
+        }
+        return strBuilder.toString();
     }
 
     private static void buildHexValues()
@@ -54,36 +62,51 @@ public class Main {
         return Integer.toString(a ^ b, 16);
     }
 
-    private static void runPython()
+    private static void runPython(String newIV)
     {
-        String message = path + arg1 + IV + ciphertext + arg2;
-        System.out.println(message);
-        System.out.println(IV.length() + ciphertext.length());
+        String message = path + arg1 + newIV + ciphertext + arg2;
         String s;
 
         try
         {
             Process p = Runtime.getRuntime().exec(message);
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
-            // read the output from the command
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
-
-            // read any errors from the attempted command
-            System.out.println("Error:");
             while ((s = stdError.readLine()) != null)
             {
                 System.out.println(s);
+                getRValue(s);
             }
         }
         catch (Exception e) {}
     }
 
+    private static void getRValue(String s)
+    {
+        int len = s.length();
+
+        for(int i = 0; i < len; i++)
+        {
+            if(s.charAt(i) == 'M')
+            {
+                System.out.println(i);
+            }
+        }
+    }
+
+    private static void runDecoder()
+    {
+        IVarray = disassembleString(IV);
+
+        for(int i = 0; i < 256; i++)
+        {
+            IVarray[15] = hex[i];
+            runPython(assembleString(IVarray));
+        }
+    }
+
     public static void main(String[] args) {
-        initializeProgram();
-        runPython();
+        buildHexValues();
+        runDecoder();
     }
 }
