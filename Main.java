@@ -73,13 +73,10 @@ public class Main {
             }
 
             // read any errors from the attempted command
-            if ((s = stdError.readLine()) != null)
+            System.out.println("Error:");
+            while ((s = stdError.readLine()) != null)
             {
-                System.out.println("Error:");
-                while ((s = stdError.readLine()) != null)
-                {
-                    System.out.println(s);
-                }
+                System.out.println(s);
             }
         }
         catch (Exception e) {}
