@@ -25,6 +25,7 @@ public class Main {
     private static String[] rValue = new String[16];
     private static String[] hex = new String[256];
     private static String[] IVarray;
+    private static int rIndex = 15;
 
     private static String[] disassembleString(String s)
     {
@@ -40,8 +41,13 @@ public class Main {
         return strBuilder.toString();
     }
 
-    private static void buildHexValues()
+    private static void initialize()
     {
+        for(int i = 0; i < 16; i++)
+        {
+            hex[i] = "00";
+        }
+
         for(int i = 0; i < 256; i++)
         {
             if(i < 16)
@@ -74,7 +80,6 @@ public class Main {
 
             while ((s = stdError.readLine()) != null)
             {
-                System.out.println(s);
                 getRValue(s);
             }
         }
@@ -89,7 +94,9 @@ public class Main {
         {
             if(s.charAt(i) == 'M')
             {
-                System.out.println(i);
+                rValue[rIndex] = IVarray[rIndex];
+                System.out.println(rValue[rIndex]);
+                rIndex--;
             }
         }
     }
@@ -106,7 +113,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        buildHexValues();
+        initialize();
         runDecoder();
     }
 }
