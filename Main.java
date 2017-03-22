@@ -17,13 +17,20 @@ public class Main {
      python client.py -ip shasta.cs.unm.edu -p 10035 -b 'IV+CT' -id 35
      */
 
-    private static String arg1 = "python client.py -ip shasta.cs.unm.edu -p 10035 -b '";
+    private static String path = "python /nfs/student/a/akuzmin/CS444/lab2tarballforstudents/client.py ";
+    private static String arg1 = "-ip shasta.cs.unm.edu -p 10035 -b '";
     private static String arg2 = "' -id 35";
     private static String IV = "4b4d3239764863686245437379465942";
     private static String ciphertext = "adbeb300136c6305bf21eb69dc71e7c0";
     private static String[] rValue = new String[16];
     private static String[] hex = new String[256];
-    private static int[] offset = new int[16];
+    private static int[] offset;
+
+    private static void initializeProgram()
+    {
+        buildHexValues();
+        offset = new int[] {16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    }
 
     private static void buildHexValues()
     {
@@ -49,32 +56,37 @@ public class Main {
 
     private static void runPython()
     {
-        String message = arg1 + IV + ciphertext + arg2;
+        String message = path + arg1 + IV + ciphertext + arg2;
+        System.out.println(message);
+        System.out.println(IV.length() + ciphertext.length());
         String s;
 
-        try {
+        try
+        {
             Process p = Runtime.getRuntime().exec(message);
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
             // read the output from the command
-            System.out.println("Here is the standard output of the command:\n");
             while ((s = stdInput.readLine()) != null) {
                 System.out.println(s);
             }
 
             // read any errors from the attempted command
-            System.out.println("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
+            if ((s = stdError.readLine()) != null)
+            {
+                System.out.println("Error:");
+                while ((s = stdError.readLine()) != null)
+                {
+                    System.out.println(s);
+                }
             }
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        catch (Exception e) {}
     }
 
     public static void main(String[] args) {
+        initializeProgram();
         runPython();
     }
 }
