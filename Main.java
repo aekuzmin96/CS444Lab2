@@ -17,7 +17,7 @@ public class Main {
      python client.py -ip shasta.cs.unm.edu -p 10035 -b 'IV+CT' -id 35
      */
 
-    private static String path = "python /nfs/student/a/akuzmin/CS444/lab2tarballforstudents/client.py ";
+    private static String path = "python /nfs/student/a/akuzmin/IdeaProjects/CS444Lab2/src/client.py ";
     private static String arg1 = "-ip shasta.cs.unm.edu -p 10035 -b '";
     private static String arg2 = "' -id 35";
     private static String IV = "4b4d3239764863686245437379465942";
