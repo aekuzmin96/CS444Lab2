@@ -22,9 +22,7 @@ public class Main {
     private static String arg2 = " -id 35";
     private static String IV = "4b4d3239764863686245437379465942";
     private static String ciphertext = "adbeb300136c6305bf21eb69dc71e7c0";
-    private static String[] IVarray;
     private static String[] rValue = new String[16];
-    private static String[] xoredRvalue = new String[16];
     private static String[] hex = new String[256];
     private static String[] changedIVarray;
     private static int rIndex = 15;
@@ -45,6 +43,8 @@ public class Main {
 
     private static void initialize()
     {
+        changedIVarray = disassembleString(IV);
+
         for(int i = 0; i < 16; i++)
         {
             hex[i] = "00";
@@ -82,7 +82,6 @@ public class Main {
 
             while ((s = stdError.readLine()) != null)
             {
-                System.out.println(s);
                 getRValue(s);
             }
         }
@@ -98,28 +97,53 @@ public class Main {
             if(s.charAt(i) == 'M')
             {
                 System.out.println(assembleString(changedIVarray));
-                rValue[rIndex] = changedIVarray[rIndex];
-                xoredRvalue[rIndex] = xor(rValue[15], "1");
+                rValue[rIndex] = xor(changedIVarray[rIndex], "1");
                 rIndex--;
             }
         }
     }
 
+    private static void searchRValues(int current)
+    {
+        for(int i = 0; i < 256; i++)
+        {
+            changedIVarray[current] = hex[i];
+            runPython(assembleString(changedIVarray));
+        }
+    }
+
     private static void runDecoder()
     {
-        changedIVarray = disassembleString(IV);
-
-        for(int i = 0; i < 256; i++)
+        /*for(int i = 0; i < 256; i++)
         {
             changedIVarray[15] = hex[i];
             runPython(assembleString(changedIVarray));
+        }*/
+
+        int counter = 1;
+        for(int i = 15; i >= 0; i--)
+        {
+            for(int j = 15; j > (16 - counter); j--)
+            {
+                changedIVarray[j] = xor(rValue[j], Integer.toString(counter));
+            }
+            searchRValues(i);
+            counter++;
         }
+    }
+
+    private static void printOut()
+    {
+        for(int i = 0; i < rValue.length; i++)
+        {
+            System.out.print(rValue[i] + " ");
+        }
+        System.out.println();
     }
 
     public static void main(String[] args) {
         initialize();
         runDecoder();
-        //System.out.println(xoredRvalue[15]);
-        //System.out.println(xor(xoredRvalue[15], ));
+        printOut();
     }
 }
