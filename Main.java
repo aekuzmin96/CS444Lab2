@@ -37,6 +37,12 @@ public class Main {
     {
         StringBuilder strBuilder = new StringBuilder();
         for (int i = 0; i < s.length; i++) {
+
+            if(s[i].length() == 1)
+            {
+                strBuilder.append("0");
+            }
+
             strBuilder.append(s[i]);
         }
         return strBuilder.toString();
@@ -120,6 +126,7 @@ public class Main {
             }
             searchRValues(i);
             counter++;
+            //printOut(changedIVarray);
         }
     }
 
