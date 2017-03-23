@@ -16,12 +16,23 @@ public class Main {
 
      python client.py -ip shasta.cs.unm.edu -p 10035 -b 'IV+CT' -id 35
      */
-
+    /*private static String[] pcap = {"4b4d3239764863686245437379465942",
+            "adbeb300136c6305bf21eb69dc71e7c0",
+            "0b9c6f19dd789479e884d29da45c0bea",
+            "c49d4a5701c2a903e9ce0d59228ea4d0",
+            "f003a065a9ac9e04f3330ef903be54dc",
+            "d7307dbc20d96bc3a3e3b45c6af1447f",
+            "fe86cdeba431347e6f27a88015a69dc0",
+            "9565754cdc87df46697fbd98184a07e5",
+            "b807a08ac6f3561650c6df665c4a7758",
+            "746fe7b340a22a6d01d94fa8b95d983d",
+            "210ea4e367b5f961cc93407c9b0598a6"};*/
     private static String path = "python /nfs/student/a/akuzmin/IdeaProjects/CS444Lab2/src/client.py ";
     private static String arg1 = "-ip shasta.cs.unm.edu -p 10035 -b ";
     private static String arg2 = " -id 35";
-    private static String IV = "4b4d3239764863686245437379465942";
-    private static String ciphertext = "adbeb300136c6305bf21eb69dc71e7c0";
+    private static String IV = "adbeb300136c6305bf21eb69dc71e7c0";
+    private static String ciphertext = "0b9c6f19dd789479e884d29da45c0bea";
+    private static String[] disassembledIV;
     private static String[] rValue = new String[16];
     private static String[] hex = new String[256];
     private static String[] changedIVarray;
@@ -50,6 +61,7 @@ public class Main {
 
     private static void initialize()
     {
+        disassembledIV = disassembleString(IV);
         changedIVarray = disassembleString(IV);
 
         for(int i = 0; i < 256; i++)
@@ -72,7 +84,7 @@ public class Main {
         return Integer.toString(a ^ b, 16);
     }
 
-    private static void runPython(String newIV)
+    private static boolean runPython(String newIV)
     {
         String message = path + arg1 + newIV + ciphertext + arg2;
         String s;
@@ -84,35 +96,40 @@ public class Main {
 
             while ((s = stdError.readLine()) != null)
             {
-                getRValue(s);
+                if(getRValue(s))
+                    return true;
             }
         }
         catch (Exception e) {}
+        return false;
     }
 
-    private static void getRValue(String s)
+    private static boolean getRValue(String s)
     {
         int len = s.length();
 
         for(int i = 0; i < len; i++)
         {
-            if(s.charAt(i) == 'M')
+            if(s.charAt(i) == 'M' && changedIVarray[rIndex] != disassembledIV[rIndex])
             {
-                printOut(changedIVarray);
-                rValue[rIndex] = xor(changedIVarray[rIndex], Integer.toString(counter));
+                //debug(changedIVarray);
+                rValue[rIndex] = xor(changedIVarray[rIndex], Integer.toHexString(counter));
                 rIndex--;
-                printOut(rValue);
+                //debug(rValue);
+                return true;
             }
         }
+        return false;
     }
 
     private static void searchRValues(int current)
     {
-        System.out.println("Searching for: " + current);
+        //System.out.println("Searching for: " + current + " Counter: " + counter);
         for(int i = 0; i < 256; i++)
         {
             changedIVarray[current] = hex[i];
-            runPython(assembleString(changedIVarray));
+            if(runPython(assembleString(changedIVarray)))
+                break;
         }
     }
 
@@ -122,15 +139,15 @@ public class Main {
         {
             for(int j = 15; j > (16 - counter); j--)
             {
-                changedIVarray[j] = xor(rValue[j], Integer.toString(counter));
+                changedIVarray[j] = xor(rValue[j], Integer.toHexString(counter));
             }
             searchRValues(i);
             counter++;
-            //printOut(changedIVarray);
+            //debug(changedIVarray);
         }
     }
 
-    private static void printOut(String[] str)
+    private static void debug(String[] str)
     {
         for(int i = 0; i < str.length; i++)
         {
@@ -139,8 +156,33 @@ public class Main {
         System.out.println();
     }
 
+    private static void printOutput()
+    {
+        String[] str = new String[16];
+        for(int i = 0; i < 16; i++)
+        {
+            str[i] = (xor(rValue[i], disassembledIV[i]));
+        }
+
+        System.out.println(hexToAscii(assembleString(str)));
+    }
+
+    private static String hexToAscii(String hexStr)
+    {
+        StringBuilder output = new StringBuilder("");
+
+        for (int i = 0; i < hexStr.length(); i += 2)
+        {
+            String str = hexStr.substring(i, i + 2);
+            output.append((char) Integer.parseInt(str, 16));
+        }
+
+        return output.toString();
+    }
+
     public static void main(String[] args) {
         initialize();
         runDecoder();
+        printOutput();
     }
 }
