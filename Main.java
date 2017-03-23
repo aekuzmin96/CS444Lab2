@@ -26,6 +26,7 @@ public class Main {
     private static String[] hex = new String[256];
     private static String[] changedIVarray;
     private static int rIndex = 15;
+    private static int counter = 1;
 
     private static String[] disassembleString(String s)
     {
@@ -44,11 +45,6 @@ public class Main {
     private static void initialize()
     {
         changedIVarray = disassembleString(IV);
-
-        for(int i = 0; i < 16; i++)
-        {
-            hex[i] = "00";
-        }
 
         for(int i = 0; i < 256; i++)
         {
@@ -96,15 +92,17 @@ public class Main {
         {
             if(s.charAt(i) == 'M')
             {
-                System.out.println(assembleString(changedIVarray));
-                rValue[rIndex] = xor(changedIVarray[rIndex], "1");
+                printOut(changedIVarray);
+                rValue[rIndex] = xor(changedIVarray[rIndex], Integer.toString(counter));
                 rIndex--;
+                printOut(rValue);
             }
         }
     }
 
     private static void searchRValues(int current)
     {
+        System.out.println("Searching for: " + current);
         for(int i = 0; i < 256; i++)
         {
             changedIVarray[current] = hex[i];
@@ -114,13 +112,6 @@ public class Main {
 
     private static void runDecoder()
     {
-        /*for(int i = 0; i < 256; i++)
-        {
-            changedIVarray[15] = hex[i];
-            runPython(assembleString(changedIVarray));
-        }*/
-
-        int counter = 1;
         for(int i = 15; i >= 0; i--)
         {
             for(int j = 15; j > (16 - counter); j--)
@@ -132,11 +123,11 @@ public class Main {
         }
     }
 
-    private static void printOut()
+    private static void printOut(String[] str)
     {
-        for(int i = 0; i < rValue.length; i++)
+        for(int i = 0; i < str.length; i++)
         {
-            System.out.print(rValue[i] + " ");
+            System.out.print(str[i] + " ");
         }
         System.out.println();
     }
@@ -144,6 +135,5 @@ public class Main {
     public static void main(String[] args) {
         initialize();
         runDecoder();
-        printOut();
     }
 }
