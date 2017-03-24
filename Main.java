@@ -1,7 +1,13 @@
 import java.io.*;
 
+/**
+ * Anton Kuzmin
+ * CBC Oracle Padding decoder lab.
+ * Given a block of initialization vector and a cipher text, decode the message and print it out.
+ * You have to change the IV and cipher text strings manually.
+ */
 public class Main {
-    /*
+    /* Entire cipher text from pcap file:
      4b4d3239764863686245437379465942
      adbeb300136c6305bf21eb69dc71e7c0
      0b9c6f19dd789479e884d29da45c0bea
@@ -13,8 +19,6 @@ public class Main {
      b807a08ac6f3561650c6df665c4a7758
      746fe7b340a22a6d01d94fa8b95d983d
      210ea4e367b5f961cc93407c9b0598a6
-
-     python client.py -ip shasta.cs.unm.edu -p 10035 -b 'IV+CT' -id 35
      */
     private static String path = "python /nfs/student/a/akuzmin/IdeaProjects/CS444Lab2/src/client.py ";
     private static String arg1 = "-ip shasta.cs.unm.edu -p 10035 -b ";
@@ -28,11 +32,17 @@ public class Main {
     private static int rIndex = 15;
     private static int counter = 1;
 
+    /**
+     * Disassemble the string into an array of 2 characters at each index
+     */
     private static String[] disassembleString(String s)
     {
         return s.split("(?<=\\G.{2})");
     }
 
+    /**
+     * Assemble the array of 2 character strings into 1 string
+     */
     private static String assembleString(String[] s)
     {
         StringBuilder strBuilder = new StringBuilder();
@@ -48,6 +58,9 @@ public class Main {
         return strBuilder.toString();
     }
 
+    /**
+     * Disassemble the initial IV into an array and make an array of hex values from 0 to 255
+     */
     private static void initialize()
     {
         disassembledIV = disassembleString(IV);
@@ -66,6 +79,9 @@ public class Main {
         }
     }
 
+    /**
+     * XOR two hex strings
+     */
     private static String xor(String one, String two)
     {
         int a = Integer.parseInt(one, 16);
@@ -73,6 +89,9 @@ public class Main {
         return Integer.toString(a ^ b, 16);
     }
 
+    /**
+     * Connect to the server and send the modified IV
+     */
     private static boolean runPython(String newIV)
     {
         String message = path + arg1 + newIV + ciphertext + arg2;
@@ -93,6 +112,9 @@ public class Main {
         return false;
     }
 
+    /**
+     * Look through the server output for valid padding and grab the byte with that padding
+     */
     private static boolean getRValue(String s)
     {
         int len = s.length();
@@ -111,6 +133,9 @@ public class Main {
         return false;
     }
 
+    /**
+     * Loop through all of the hex values for valid padding and send the modified IV to the server
+     */
     private static void searchRValues(int current)
     {
         //System.out.println("Searching for: " + current + " Counter: " + counter);
@@ -122,6 +147,9 @@ public class Main {
         }
     }
 
+    /**
+     * Run the decoding for all 16 bytes and update the previous byte values accordingly
+     */
     private static void runDecoder()
     {
         for(int i = 15; i >= 0; i--)
@@ -136,6 +164,10 @@ public class Main {
         }
     }
 
+    /**
+     * Used for debugging purposes
+     * Print out the array of strings
+     */
     private static void debug(String[] str)
     {
         for(int i = 0; i < str.length; i++)
@@ -145,17 +177,9 @@ public class Main {
         System.out.println();
     }
 
-    private static void printOutput()
-    {
-        String[] str = new String[16];
-        for(int i = 0; i < 16; i++)
-        {
-            str[i] = (xor(rValue[i], disassembledIV[i]));
-        }
-
-        System.out.println(hexToAscii(assembleString(str)));
-    }
-
+    /**
+     * Convert the hex byte string to ascii characters
+     */
     private static String hexToAscii(String hexStr)
     {
         StringBuilder output = new StringBuilder("");
@@ -167,6 +191,20 @@ public class Main {
         }
 
         return output.toString();
+    }
+
+    /**
+     * Print the plain text output
+     */
+    private static void printOutput()
+    {
+        String[] str = new String[16];
+        for(int i = 0; i < 16; i++)
+        {
+            str[i] = (xor(rValue[i], disassembledIV[i]));
+        }
+
+        System.out.println(hexToAscii(assembleString(str)));
     }
 
     public static void main(String[] args) {
