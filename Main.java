@@ -123,6 +123,7 @@ public class Main {
         {
             if(s.charAt(i) == 'M' && changedIVarray[rIndex] != disassembledIV[rIndex])
             {
+                System.out.println(" - found " + changedIVarray[rIndex]);
                 //debug(changedIVarray);
                 rValue[rIndex] = xor(changedIVarray[rIndex], Integer.toHexString(counter));
                 rIndex--;
@@ -138,7 +139,7 @@ public class Main {
      */
     private static void searchRValues(int current)
     {
-        //System.out.println("Searching for: " + current + " Counter: " + counter);
+        System.out.print("Searching for byte: " + current);
         for(int i = 0; i < 256; i++)
         {
             changedIVarray[current] = hex[i];
